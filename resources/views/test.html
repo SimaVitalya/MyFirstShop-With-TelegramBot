@@ -1,0 +1,353 @@
+@extends('layouts.main')
+@section('title', 'Корзина')
+@section('content')
+
+<div class="container" style="margin-bottom:150px">
+    <div class="starter-template">
+        <!-- <p class="alert alert-success">Добавлен товар HTC One S</p> -->
+        <h1>Корзина</h1>
+        <p>Оформление заказа</p>
+        <div class="panel">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Кол-во</th>
+                    <th>Цена</th>
+                    <th>Стоимость</th>
+                </tr>
+                </thead>
+                <tbody class="products_body">
+                {{--                    @if(session()->has('success'))--}}
+                {{--                        <p class="alert alert-success"> {{session()->get('success')}}</p>--}}
+                {{--                    @endif--}}
+                {{--                    @if(session()->has('danger'))--}}
+                {{--                        <p class="alert alert-danger"> {{session()->get('danger')}}</p>--}}
+                {{--                    @endif--}}
+                {{--                    @foreach($products as $product)--}}
+                {{--                        @dd($product)--}}
+                {{--                        <tr class="product">--}}
+                    {{--                            <td>--}}
+                        {{--                                <a href="{{route('product.show',$product['id'])}}">--}}
+                            {{--                                    <img height="56px"--}}
+                                                                         {{--                                         src="storage/{{$product['image']}}">--}}
+                            {{--                                    {{$product['name']}}--}}
+                            {{--                                </a>--}}
+                        {{--                            </td>--}}
+                    {{--                            <td><span class="span">{{$product['count']}}</span>--}}
+                        {{--                                <div class="btn-group form-inline">--}}
+                            {{--                                    <form action="{{route('basked-remove',$product['id'])}} " method="post">--}}
+                                {{--                                        @csrf--}}
+                                {{--                                        <button type="submit" class="btn btn-danger"--}}
+                                                                                    {{--                                                class="glyphicon glyphicon-minus"></button>--}}
+
+                                {{--                                    </form>--}}
+                            {{--                                    <form action="{{route('basked-add',$product['id'])}} " method="post">--}}
+                                {{--                                        @csrf--}}
+                                {{--                                        <button type="submit" class="btn btn-success"--}}
+                                                                                    {{--                                                class="glyphicon glyphicon-minus"></button>--}}
+
+                                {{--                                    </form>--}}
+                            {{--                                    <div class="d-flex">--}}
+                                {{--                                        <button class="button_plus">+</button>--}}
+                                {{--                                        <input type="number" class="quantity" value="1"/>--}}
+                                {{--                                        <button class="button_minus">-</button>--}}
+                                {{--                                    </div>--}}
+                            {{--                                </div>--}}
+                        {{--                            </td>--}}
+                    {{--                            <td class="price">{{$product['price']}} ₴</td>--}}
+                    {{--                            <td class="price_sum"> {{$product['fullPrice']}}₴</td>--}}
+
+                    {{--                        </tr>--}}
+                {{--                    @endforeach--}}
+                {{--                    <tr>--}}
+                    {{--                        <td colspan="3">Общая стоимость:</td>--}}
+                    {{--                        <td colspan="3">{{$totalPrice}}₴</td>--}}
+                    {{--                    </tr>--}}
+                </tbody>
+            </table>
+            <br>
+            <div style="margin-bottom: 100px;" class="btn-group pull-right" role="group">
+                <a type="button" class="btn btn-success" href="https://internet-shop.tmweb.ru/basket/place">Оформить
+                    заказ</a>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+@section('script')
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        getBasket()
+
+    });
+
+    function getBasket() {
+        $.ajax({
+            url: '/basket/json',
+            method: 'GET',
+            data: {},
+            success: function (response) {
+                let htmls = ""
+                let totalPrice = response.total_price;
+                // console.log(response)
+                response.products.forEach((product, key) => {
+                    let html = '<tr>';
+                    html += '<td>' +
+                        '<a href="">' +
+                        '<img height="56px" src="storage/' + product.image + '">' + product.name + '</a>' +
+                        '</td>'
+                    html += '<td>' +
+                        //cпросись за html =+
+                        '<span class="span">' + product.count + '</span>' +
+                        '<div class="btn-group form-inline">' +
+
+
+                        '<button class="btn btn-danger button_plus" data-id="' + product.id + '">+</button>' +
+                        '<button class="btn btn-success button_minus"  data-id="' + product.id + '">-</button>' +
+
+                        '</div>' +
+                        '</td>'
+                    html += '<td class="price">' + product.price + ' ₴</td>'
+                    html += '<td class="price_sum"> ' + product.fullPrice + '₴</td>'
+
+                    html += '</tr>';
+                    htmls += html
+                })
+                htmls += ' <tr>' +
+                    '<td colspan="3">Общая стоимость:</td>' +
+                    '<td colspan="3">' + totalPrice + '₴</td>' +
+                    '</tr>'
+
+                $('.products_body').html(htmls)
+                $('.button_plus').on('click', function () {
+                    let id = $(this).attr('data-id')
+
+                    $.ajax({
+                        url: '/basket/add/' + id,
+                        method: 'GET',
+                        data: {},
+                        success: function (response) {
+                            // alert(response.message)
+                            getBasket()
+                        }
+                    });
+                });
+
+                $('.button_minus').on('click', function () {
+                    let id = $(this).attr('data-id')
+
+                    $.ajax({
+                        url: '/basket/remove/' + id,
+                        method: 'GET',
+                        data: {},
+                        success: function (response) {
+                            // alert(response.message)
+                            getBasket()
+                        }
+                    });
+                });
+            },
+            error: function (response) {
+
+            }
+        });
+
+
+    }
+
+
+</script>
+
+@endsection
+{{--<tr>--}}
+    {{--    <td>--}}
+        {{--        <a href="http://myfirstshop/product/4">--}}
+            {{--            <img height="56px" src="storage/product_4.jpg">--}}
+            {{--            Product 4--}}
+
+            {{--        </a>--}}
+        {{--    </td>--}}
+    {{--    <td><span class="span">4</span>--}}
+        {{--        <div class="btn-group form-inline">--}}
+            {{--            <form action="http://myfirstshop/basket/remove/4 " method="post">--}}
+                {{--                <input type="hidden" name="_token" value="uAVOzTytLdrsk6j7mWFDoGc6DBLE0HBrmIeTVD2Y">--}}
+                {{--                <button type="submit" class="btn btn-danger"></button>--}}
+
+                {{--            </form>--}}
+            {{--            <form action="http://myfirstshop/basket/add/4 " method="post">--}}
+                {{--                <input type="hidden" name="_token" value="uAVOzTytLdrsk6j7mWFDoGc6DBLE0HBrmIeTVD2Y">--}}
+                {{--                <button type="submit" class="btn btn-success"></button>--}}
+
+                {{--            </form>--}}
+
+
+            {{--        </div>--}}
+        {{--    </td>--}}
+    {{--    <td class="price">1331 ₴</td>--}}
+    {{--    <td class="price_sum"> 5324₴</td>--}}
+
+    {{--</tr>--}}
+
+{{--        $('.button_plus').on('click', function () {--}}
+{{--            let quantity = $(this).closest('tr').find('.quantity');--}}
+{{--            quantity.val(parseInt(quantity.val()) + 1).trigger('change');--}}
+{{--        });--}}
+
+
+{{--        $('.button_minus').on('click', function () {--}}
+{{--            let quantity = $(this).parent().find('.quantity');--}}
+{{--            let currentVal = parseInt(quantity.val());--}}
+{{--            if (currentVal > 1) {--}}
+{{--                quantity.val(currentVal - 1).trigger('change');--}}
+{{--            }--}}
+{{--        });--}}
+
+{{--        $('.quantity').on('change', function () {--}}
+{{--            let price = parseInt($(this).parent().find('.price').text());--}}
+{{--            console.log(price)--}}
+{{--            let quantity = parseInt($(this).val());--}}
+{{--            let sum_price = quantity * price;--}}
+{{--            $(this).parent().parent().find('.price_sum').text(sum_price + ' ₴');--}}
+
+{{--            // обновление общей стоимости заказа--}}
+{{--            let total_price = 0;--}}
+{{--            $('.price_sum').each(function () {--}}
+{{--                total_price += parseInt($(this).text());--}}
+{{--            });--}}
+{{--            $('.total_price').text(total_price + ' ₴');--}}
+{{--        });--}}
+
+{{--    </script>--}}
+@endsection
+отредактирован
+
+
+
+
+@extends('layouts.main')
+@section('title', 'Корзина')
+@section('content')
+
+<div class="container" style="margin-bottom:150px">
+    <div class="starter-template">
+        <h1>Корзина</h1>
+        <p>Оформление заказа</p>
+        <div class="panel">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>Название</th>
+                    <th>Кол-во</th>
+                    <th>Цена</th>
+                    <th>Стоимость</th>
+                </tr>
+                </thead>
+                <tbody class="products_body">
+
+                </tbody>
+            </table>
+            <br>
+            <div style="margin-bottom: 100px;" class="btn-group pull-right" role="group">
+                <a type="button" class="btn btn-success" href="https://internet-shop.tmweb.ru/basket/place">Оформить
+                    заказ</a>
+            </div>
+        </div>
+    </div>
+</div>
+@endsection
+@section('script')
+<script>
+    $(document).ready(function () {
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': jQuery('meta[name="csrf-token"]').attr('content')
+            }
+        });
+        getBasket()
+
+    });
+
+    function getBasket() {
+        $.ajax({
+            url: '/basket/json',
+            method: 'GET',
+            data: {},
+            success: function (response) {
+                let htmls = ""
+                let totalPrice = response.total_price;
+                // console.log(response)
+                response.products.forEach((product, key) => {
+                    let html = '<tr>';
+                    html += '<td>' +
+                        '<a href="">' +
+                        '<img height="56px" src="storage/' + product.image + '">' + product.name + '</a>' +
+                        '</td>'
+                    html += '<td>' +
+                        //cпросись за html =+
+                        '<span class="span">' + product.count + '</span>' +
+                        '<div class="btn-group form-inline">' +
+
+
+                        '<button class="btn btn-danger button_plus" data-id="' + product.id + '">+</button>' +
+                        '<button class="btn btn-success button_minus"  data-id="' + product.id + '">-</button>' +
+
+                        '</div>' +
+                        '</td>'
+                    html += '<td class="price">' + product.price + ' ₴</td>'
+                    html += '<td class="price_sum"> ' + product.fullPrice + '₴</td>'
+
+                    html += '</tr>';
+                    htmls += html
+                })
+                htmls += ' <tr>' +
+                    '<td colspan="3">Общая стоимость:</td>' +
+                    '<td colspan="3">' + totalPrice + '₴</td>' +
+                    '</tr>'
+
+                $('.products_body').html(htmls)
+                $('.button_plus').on('click', function () {
+                    let id = $(this).attr('data-id')
+
+                    $.ajax({
+                        url: '/basket/add/' + id,
+                        method: 'GET',
+                        data: {},
+                        success: function (response) {
+                            // alert(response.message)
+                            getBasket()
+                        }
+                    });
+                });
+
+                $('.button_minus').on('click', function () {
+                    let id = $(this).attr('data-id')
+
+                    $.ajax({
+                        url: '/basket/remove/' + id,
+                        method: 'GET',
+                        data: {},
+                        success: function (response) {
+                            // alert(response.message)
+                            getBasket()
+                        }
+                    });
+                });
+            },
+            error: function (response) {
+
+            }
+        });
+
+
+    }
+
+
+</script>
+
+@endsection

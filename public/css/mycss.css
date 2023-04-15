@@ -1,0 +1,46 @@
+.button_plus{
+    margin-right:2px;
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #d5c1c1;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.button_minus{
+    margin-left: 2px;
+    display: inline-block;
+    padding: 5px 10px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #d5c1c1;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.button_plus:hover {
+    background-color: green;
+    color: #fff;
+}
+.button_minus:hover{
+    background-color: red;
+    color: #fff;
+}
+.quantity {
+    text-decoration: none;
+    display: inline-block;
+    width: 50px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin: 0 5px;
+    font-size: 14px;
+    padding: 5px;
+}
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
